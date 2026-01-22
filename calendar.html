@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion Black Calendar</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000; /* 전체 배경 검정 */
+            margin: 0;
+            padding: 20px; /* 사방에 여백을 줘서 숫자가 보이게 함 */
+            display: flex;
+            justify-content: center;
+        }
+
+        #calendari {
+            width: 100%;
+            max-width: 350px; /* 너무 커지지 않게 제한 */
+            background-color: #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff; /* 모든 글자 흰색 */
+        }
+
+        /* 월, 연도 표시 */
+        th {
+            padding: 10px 0;
+            font-size: 20px;
+            text-align: center;
+        }
+        
+        .any { 
+            display: block;
+            font-size: 14px;
+            color: #888;
+        }
+
+        /* 요일 (Mon, Tue...) */
+        .day-header {
+            font-size: 12px;
+            font-weight: bold;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        /* 날짜 숫자 */
+        td {
+            text-align: center;
+            padding: 8px 0;
+            font-size: 16px;
+        }
+
+        /* 오늘 날짜: 흰색 동그라미 + 검정 글자 */
+        td.avui span {
+            display: inline-block;
+            background-color: #fff;
+            color: #000;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        /* 이전/다음 달 날짜 (흐리게) */
+        td.fora {
+            opacity: 0.3;
+        }
+
+        /* 버튼 스타일 */
+        .boto-next, .boto-prev {
+            background: none;
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="calendari"></div>
+
+    <script>
+        var mesos = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        var dies_abr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        function calendari(widget, data) {
+            widget.innerHTML = '';
+            var e = document.createElement('table');
+            
+            // 헤더 (월/연도/버튼)
+            var head = e.insertRow();
+            var titol = document.createElement('th');
+            titol.colSpan = 7;
+            
+            var btnPrev = document.createElement('button');
+            btnPrev.innerHTML = '&#9666;';
+            btnPrev.className = 'boto-prev';
+            btnPrev.onclick = function() { data.setMonth(data.getMonth() - 1); calendari(widget, data); };
+            
+            var btnNext = document.createElement('button');
+            btnNext.innerHTML = '&#9656;';
+            btnNext.className = 'boto-next';
+            btnNext.onclick = function() { data.setMonth(data.getMonth() + 1); calendari(widget, data); };
+            
+            titol.appendChild(btnPrev);
+            var txt = document.createElement('span');
+            txt.innerHTML = ' ' + mesos[data.getMonth()] + ' <span class="any">' + data.getFullYear() + '</span> ';
+            titol.appendChild(txt);
+            titol.appendChild(btnNext);
+            head.appendChild(titol);
+
+            // 요일 표시 (Mon...Sun 순서)
+            var rowDays = e.insertRow();
+            for(var i=1; i<7; i++) {
+                var th = document.createElement('th');
+                th.className = 'day-header';
+                th.innerHTML = dies_abr[i];
+                rowDays.appendChild(th);
+            }
+            var thSun = document.createElement('th');
+            thSun.className = 'day-header';
+            thSun.innerHTML = dies_abr[0];
+            rowDays.appendChild(thSun);
+
+            // 날짜 계산
+            var firstDay = new Date(data.getFullYear(), data.getMonth(), 1);
+            var startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+            var actual = new Date(data.getFullYear(), data.getMonth(), 1 - startDay);
+
+            for(var s = 0; s < 6; s++) {
+                var row = e.insertRow();
+                for(var d = 0; d < 7; d++) {
+                    var cell = row.insertCell();
+                    var span = document.createElement('span');
+                    span.innerHTML = actual.getDate();
+                    cell.appendChild(span);
+
+                    if(actual.getMonth() !== data.getMonth()) cell.className = 'fora';
+                    
+                    var today = new Date();
+                    if(actual.getDate() == today.getDate() && actual.getMonth() == today.getMonth() && actual.getFullYear() == today.getFullYear()) {
+                        cell.className = 'avui';
+                    }
+
+                    actual.setDate(actual.getDate() + 1);
+                }
+            }
+            widget.appendChild(e);
+        }
+        calendari(document.getElementById('calendari'), new Date());
+    </script>
+</body>
+</html>
