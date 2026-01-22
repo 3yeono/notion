@@ -3,136 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Notion Calendar</title>
+    <title>Notion Calendar</title>
     <style>
-        /* 배경을 투명하게 설정 */
+        /* 노션 임베드 최적화 */
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: transparent; /* 배경색 제거 */
             margin: 0;
+            padding: 10px;
             display: flex;
             justify-content: center;
-            overflow: hidden;
+            background-color: transparent; /* 주변 배경 투명 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
         }
 
         #calendari {
-            width: 300px;
-            background-color: #fff; /* 달력 몸통은 하얀색 */
-            border-radius: 15px; /* 모서리 둥글게 */
+            width: 280px;
+            background-color: #ffffff; /* 달력 숫자 부분 배경은 흰색 */
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0px 2px 10px rgba(0,0,0,0.1); /* 살짝 그림자 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
-        /* 1. 상단 '달' 표시 부분만 검정색 */
-        th.header-box {
-            background-color: #000; /* 검정색 배경 */
-            color: #fff;
-            padding: 15px 10px;
+        /* 달(Month)과 요일(Day) 헤더 - 검정색 배경 */
+        .black-header {
+            background-color: #000000;
+            color: #ffffff;
         }
 
-        /* 화살표와 달 이름을 일직선으로 */
-        .header-container {
+        /* 달 이름과 화살표 한 줄 정렬 */
+        .month-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 12px 15px;
         }
 
         .month-name {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
-        /* 2. 화살표 스타일 */
-        .boto-next, .boto-prev {
+        .nav-btn {
             background: none;
-            color: #fff;
             border: none;
-            font-size: 18px;
+            color: white;
+            font-size: 16px;
             cursor: pointer;
-            padding: 0 10px;
+            padding: 0 5px;
         }
 
-        /* 3. 요일(Mon, Tue...) 부분 검정색 */
+        /* 요일 헤더 (Mon, Tue...) */
         .day-header {
-            background-color: #000;
-            color: #fff;
             font-size: 11px;
-            padding: 8px 0;
-            font-weight: normal;
+            padding-bottom: 8px;
+            text-align: center;
+            font-weight: 500;
+            opacity: 0.9;
         }
 
-        /* 날짜 숫자 (하얀 배경에 검정 글자) */
+        /* 날짜 숫자 스타일 */
         td {
             text-align: center;
-            padding: 10px 0;
-            font-size: 14px;
-            color: #333;
-            background-color: #fff;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #333333;
         }
 
-        /* 오늘 날짜: 검정 동그라미 */
-        td.avui span {
+        /* 오늘 날짜 표시 (검정 동그라미) */
+        .today span {
             display: inline-block;
-            background-color: #000;
-            color: #fff;
-            width: 28px;
-            height: 28px;
-            line-height: 28px;
+            background-color: #000000;
+            color: #ffffff;
+            width: 26px;
+            height: 26px;
+            line-height: 26px;
             border-radius: 50%;
+            font-weight: 600;
         }
 
-        /* 이전/다음 달 숫자 흐리게 */
-        td.fora {
-            opacity: 0.2;
+        /* 다른 달 날짜 흐리게 */
+        .other-month {
+            color: #cccccc;
         }
     </style>
 </head>
 <body>
-    <div id="calendari"></div>
 
-    <script>
-        var mesos = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        var dies_abr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-        function calendari(widget, data) {
-            widget.innerHTML = '';
-            var e = document.createElement('table');
-            
-            // 헤더 생성
-            var headRow = e.insertRow();
-            var headCell = document.createElement('th');
-            headCell.colSpan = 7;
-            headCell.className = 'header-box';
-            
-            var container = document.createElement('div');
-            container.className = 'header-container';
-            
-            var btnPrev = document.createElement('button');
-            btnPrev.innerHTML = '&#10094;'; // 깔끔한 화살표
-            btnPrev.className = 'boto-prev';
-            btnPrev.onclick = function() { data.setMonth(data.getMonth() - 1); calendari(widget, data); };
-            
-            var monthTxt = document.createElement('span');
-            monthTxt.className = 'month-name';
-            monthTxt.innerHTML = mesos[data.getMonth()]; // 연도 삭제함
-            
-            var btnNext = document.createElement('button');
-            btnNext.innerHTML = '&#10095;';
-            btnNext.className = 'boto-next';
-            btnNext.onclick = function() { data.setMonth(data.getMonth() + 1); calendari(widget, data); };
-            
-            container.appendChild(btnPrev);
-            container.appendChild(monthTxt);
-            container.appendChild(btnNext);
-            headCell.appendChild(container);
-            headRow.appendChild(headCell);
-
-            // 요일 행
-            var rowDays = e.insertRow();
-            for(var i=1; i<7; i++) {
-                var th = document.createElement('th');
+<div id="calendari">
+    <div class="black-header">
+        <div class="month-row">
+            <button class="nav-btn" onclick="moveMonth(-1)">&#10094
